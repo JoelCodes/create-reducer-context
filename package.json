@@ -1,0 +1,27 @@
+{
+  "name": "redux-react-context",
+  "version": "1.0.0",
+  "description": "All-in-one Redux and React-Redux with the React Context API.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JoelCodes/redux-react-context.git"
+  },
+  "keywords": [
+    "react",
+    "redux",
+    "context"
+  ],
+  "author": "Joel Shinness <me@joelshinness.com> (http://joelshinness.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JoelCodes/redux-react-context/issues"
+  },
+  "homepage": "https://github.com/JoelCodes/redux-react-context#readme",
+  "dependencies": {
+    "react": "^16.3.0-alpha.1"
+  }
+}
