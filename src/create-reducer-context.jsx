@@ -32,16 +32,21 @@ export default function createReducerContext(reducer, preloadedStateOrMW, mw){
     Consumer:ReduceContextConsumer,
   } = createContext();
   class Provider extends Component {
-    state = preloadedStateOrMW
+    constructor(){
+      super();
+      this.state = preloadedStateOrMW;
+      this.store = {
+        getState: this.getState,
+        dispatch: typeof mw === 'function' ? (action) => {
+          mw(this.store)(this.update)(action);
+         } :
+          this.update
+      } 
+    }
+    getState = () => this.state
     update = (action) => {
       this.setState((state) => reducer(state, action));
     }
-    store = {
-      getState: () => this.state,
-      dispatch: typeof mw === 'function' ?
-        mw(this.store)(this.update) :
-        this.update
-    } 
     render(){
       return (<ReduceContextProvider value={this.store}>
         {this.props.children}

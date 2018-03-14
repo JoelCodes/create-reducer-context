@@ -1,6 +1,6 @@
 /* eslint-env jest */
-import chai, {expect} from 'chai';
-import {configure, shallow, mount, render} from 'enzyme';
+import {expect} from 'chai';
+import {configure, mount} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import React from 'react';
 
@@ -113,6 +113,54 @@ describe('#createReducerContext(reducer[, preloadedState][, middleware])', () =>
       await delay(1000);
       expect(wrapper.find('span').text()).to.eq('Count: 1');    
     });
-    it('permits the middleware access to the store');
+
+    it('permits the middleware access to the store state', () => {
+
+      let firstState;
+      const storeMw = (store) => (next) => (action) => {
+        firstState = store.getState();
+        next(action);
+      };
+
+      const {connect, Provider} = createReducerContext(incrementReducer, {count: -1}, storeMw);
+      const ConnectedDisplayer = connect(mapStateToProps)(Displayer);
+      const ConnectedClicker = connect(() => ({}), mapDispatchToProps)(Clicker);
+      const wrapper = mount(<Provider>
+        <ConnectedDisplayer />
+        <ConnectedClicker />
+      </Provider>);
+
+      expect(wrapper.find('span').text()).to.eq('Count: -1');    
+      wrapper.find('button').simulate('click');
+      expect(wrapper.find('span').text()).to.eq('Count: 0');
+      expect(firstState).to.deep.eq({count: -1});
+    });
+
+    it('permits the middleware to access the store dispatch', () => {
+      const triggerMW = (store) => (next) => (action) => {
+        if(action.type === 'TRIGGER'){
+          store.dispatch(incrementAction);
+        } else {
+          next(action);
+        }
+      };
+
+      const {connect, Provider} = createReducerContext(incrementReducer, {count: -1}, triggerMW);
+      const ConnectedDisplayer = connect(mapStateToProps)(Displayer);
+      const mapDispatchToProps = (dispatch) => ({
+        increment: () => dispatch({type: 'TRIGGER'}) 
+      });
+
+      const ConnectedClicker = connect(() => ({}), mapDispatchToProps)(Clicker);
+      const wrapper = mount(<Provider>
+        <ConnectedDisplayer />
+        <ConnectedClicker />
+      </Provider>);
+
+      expect(wrapper.find('span').text()).to.eq('Count: -1');    
+      wrapper.find('button').simulate('click');
+      expect(wrapper.find('span').text()).to.eq('Count: 0');
+      
+    });
   });
 });
