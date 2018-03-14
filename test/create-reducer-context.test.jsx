@@ -65,11 +65,36 @@ describe('#createReducerContext(reducer[, preloadedState][, middleware])', () =>
     expect(wrapper.find('span').text()).to.eq('Count: 0');    
     wrapper.find('button').simulate('click');
     expect(wrapper.find('span').text()).to.eq('Count: 1');    
-    
   });
+
   describe('middleware', () => {
-    it('lets a flow-through middleware work unimpeded');
-    it('makes no change on a blocking middleware');
+    it('lets a flow-through middleware work unimpeded', () => {
+      const playThrough = () => next => action => next(action);
+      const {connect, Provider} = createReducerContext(incrementReducer, playThrough);
+      const ConnectedDisplayer = connect(mapStateToProps)(Displayer);
+      const ConnectedClicker = connect(() => ({}), mapDispatchToProps)(Clicker);
+      const wrapper = mount(<Provider>
+        <ConnectedDisplayer />
+        <ConnectedClicker />
+      </Provider>);
+      expect(wrapper.find('span').text()).to.eq('Count: 0');    
+      wrapper.find('button').simulate('click');
+      expect(wrapper.find('span').text()).to.eq('Count: 1');          
+    });
+    it('makes no change on a blocking middleware', () => {
+      const blocking = () => () => () => {};
+      const {connect, Provider} = createReducerContext(incrementReducer, blocking);
+      const ConnectedDisplayer = connect(mapStateToProps)(Displayer);
+      const ConnectedClicker = connect(() => ({}), mapDispatchToProps)(Clicker);
+      const wrapper = mount(<Provider>
+        <ConnectedDisplayer />
+        <ConnectedClicker />
+      </Provider>);
+      expect(wrapper.find('span').text()).to.eq('Count: 0');    
+      wrapper.find('button').simulate('click');
+      expect(wrapper.find('span').text()).to.eq('Count: 0');          
+      
+    });
     it('permits async middleware');
   });
 });
