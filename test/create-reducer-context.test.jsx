@@ -92,9 +92,27 @@ describe('#createReducerContext(reducer[, preloadedState][, middleware])', () =>
       </Provider>);
       expect(wrapper.find('span').text()).to.eq('Count: 0');    
       wrapper.find('button').simulate('click');
-      expect(wrapper.find('span').text()).to.eq('Count: 0');          
-      
+      expect(wrapper.find('span').text()).to.eq('Count: 0');
     });
-    it('permits async middleware');
+    it('permits async middleware', async () => {
+      const delay = (t) => new Promise(resolve => setTimeout(resolve, t));
+      const waiting = () => (next) => async (action) => {
+        await delay(100);
+        next(action);
+      };
+      const {connect, Provider} = createReducerContext(incrementReducer, waiting);
+      const ConnectedDisplayer = connect(mapStateToProps)(Displayer);
+      const ConnectedClicker = connect(() => ({}), mapDispatchToProps)(Clicker);
+      const wrapper = mount(<Provider>
+        <ConnectedDisplayer />
+        <ConnectedClicker />
+      </Provider>);
+      expect(wrapper.find('span').text()).to.eq('Count: 0');    
+      wrapper.find('button').simulate('click');
+      expect(wrapper.find('span').text()).to.eq('Count: 0'); 
+      await delay(1000);
+      expect(wrapper.find('span').text()).to.eq('Count: 1');    
+    });
+    it('permits the middleware access to the store');
   });
 });
