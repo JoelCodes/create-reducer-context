@@ -1,4 +1,5 @@
 /* eslint-env jest */
+/* eslint react/prop-types:"off" */
 import {expect} from 'chai';
 import {configure, mount} from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';

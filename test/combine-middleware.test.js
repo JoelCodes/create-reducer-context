@@ -31,9 +31,6 @@ describe('#combineMiddleware(...middleware)', () => {
   });
   it('combines the middleware', () => {
     const signals = [];
-    const playThrough = () => next => action => {
-      next(action);
-    };
     const mw1 = () => (next) => (action) => {
       signals.push('mw1 before');
       next(action);
