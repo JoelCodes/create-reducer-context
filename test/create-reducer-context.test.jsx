@@ -27,10 +27,15 @@ describe('#createReducerContext(reducer[, preloadedState][, middleware])', () =>
 
   // Assets to reuse for tests.
   const initialState = {count: 0};
-  const incrementReducer = ({count} = initialState, action) => action.type === 'INC' ? {count: count + 1} : {count };
+  const incrementReducer = (state = initialState, action) => action.type === 'INC' ? {count: state.count + 1} :state;
   const incrementAction = {type: 'INC'};
   const mapStateToProps = ({count}) => ({count});
   const Displayer = ({count}) => <span>Count: {count}</span>;
+
+  const mapDispatchToProps = (dispatch) => ({increment: () => {
+    dispatch(incrementAction);
+  }});
+  const Clicker = ({increment}) => <button onClick={increment}>Increment</button>;
 
   it('takes in a reducer and preloadedState and returns a Provider and connect', () => {
     const {connect, Provider} = createReducerContext(incrementReducer, {count: -1});
@@ -52,10 +57,14 @@ describe('#createReducerContext(reducer[, preloadedState][, middleware])', () =>
   it('changes in response to actions', () => {
     const {connect, Provider} = createReducerContext(incrementReducer);
     const ConnectedDisplayer = connect(mapStateToProps)(Displayer);
+    const ConnectedClicker = connect(() => ({}), mapDispatchToProps)(Clicker);
     const wrapper = mount(<Provider>
       <ConnectedDisplayer />
+      <ConnectedClicker />
     </Provider>);
     expect(wrapper.find('span').text()).to.eq('Count: 0');    
+    wrapper.find('button').simulate('click');
+    expect(wrapper.find('span').text()).to.eq('Count: 1');    
     
   });
   describe('middleware', () => {

@@ -31,19 +31,24 @@ export default function createReducerContext(reducer, preloadedStateOrMW, mw){
     Provider:ReduceContextProvider, 
     Consumer:ReduceContextConsumer,
   } = createContext();
-  console.log(ReduceContextProvider);
   class Provider extends Component {
     state = preloadedStateOrMW
+    dispatch = (action) => {
+      this.setState((state) => reducer(state, action))
+    }
+    getState = () => {
+      return this.state;
+    }
     render(){
-      return (<ReduceContextProvider value={this.state}>
+      return (<ReduceContextProvider value={{state: this.state, dispatch: this.dispatch}}>
         {this.props.children}
       </ReduceContextProvider>);
     }
   }
-  function connect(mapStateToProps){
+  function connect(mapStateToProps, mapDispatchToProps = () => ({})){
     return (InnerComponent) => () => {
       return (<ReduceContextConsumer>
-        {(state) =>  (<InnerComponent {...mapStateToProps(state)}/>)}
+        {({state, dispatch}) =>  (<InnerComponent {...mapStateToProps(state)} {...mapDispatchToProps(dispatch)}/>)}
       </ReduceContextConsumer>);
     };
   }
